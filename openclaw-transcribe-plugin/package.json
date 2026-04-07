@@ -1,0 +1,39 @@
+{
+  "name": "openclaw-transcribe-plugin",
+  "version": "0.1.0",
+  "description": "OpenClaw plugin exposing transcribe_media for local files and YouTube audio through the transcription-system pipeline",
+  "type": "module",
+  "main": "index.ts",
+  "files": [
+    "index.ts",
+    "src/",
+    "openclaw.plugin.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "openclaw",
+    "plugin",
+    "transcription",
+    "youtube",
+    "audio",
+    "whisper",
+    "groq",
+    "ffmpeg",
+    "yt-dlp"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kowalunioo/transcription-system.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "openclaw": "*"
+  },
+  "openclaw": {
+    "extensions": ["./index.ts"]
+  }
+}

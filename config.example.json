@@ -1,0 +1,16 @@
+{
+  "model": "small",
+  "device": "auto",
+  "computeType": "auto",
+  "language": null,
+  "task": "transcribe",
+  "outputDir": ".openclaw/transcripts",
+  "tempDir": ".openclaw/transcripts/tmp",
+  "cache": true,
+  "wordTimestamps": false,
+  "vadFilter": true,
+  "beamSize": 5,
+  "srt": true,
+  "json": true,
+  "text": true
+}

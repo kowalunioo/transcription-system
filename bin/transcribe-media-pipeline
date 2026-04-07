@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VENV_DEFAULT="$(cd "$ROOT/.." && pwd)/.venv-transcribe"
+VENV_PATH="${OPENCLAW_TRANSCRIBE_VENV:-$VENV_DEFAULT}"
+PY="$VENV_PATH/bin/python"
+if [[ ! -x "$PY" ]]; then
+  echo "Missing Python runtime at: $PY" >&2
+  exit 1
+fi
+exec "$PY" "$ROOT/src/media_pipeline.py" "$@"

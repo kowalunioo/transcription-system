@@ -1,0 +1,20 @@
+{
+  "id": "openclaw-transcribe",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "venvPath": { "type": "string" },
+      "scriptPath": { "type": "string" },
+      "defaultModel": { "type": "string" },
+      "defaultLanguage": { "type": ["string", "null"] },
+      "defaultOutputFormat": { "type": "string" },
+      "defaultTimestamps": { "type": "boolean" },
+      "defaultSource": { "type": "string", "enum": ["file", "youtube"] },
+      "defaultTier": { "type": "string", "enum": ["free", "dev"] },
+      "chunkOverlapSeconds": { "type": "number" },
+      "outputDir": { "type": "string" },
+      "tempDir": { "type": "string" }
+    }
+  }
+}

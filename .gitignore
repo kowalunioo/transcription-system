@@ -1,0 +1,10 @@
+.openclaw/
+.venv-transcribe/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+transcripts/
+downloads/
+chunked-transcripts/
