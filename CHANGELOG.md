@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 - 2026-04-07
+
+### Release note
+- Re-cut release after hardening the Groq transport against local process-argument secret exposure.
+
 ## 0.1.1 - 2026-04-07
 
 ### Security / transport hardening
