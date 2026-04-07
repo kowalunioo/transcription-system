@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 - 2026-04-07
+
+### Security / transport hardening
+- replaced the Groq `curl` subprocess call with a native Python HTTP request so `GROQ_API_KEY` is no longer exposed through process arguments during transcription
+
 ## 0.1.0 - 2026-04-07
 
 ### Added

@@ -2,10 +2,10 @@
 import argparse
 import hashlib
 import json
-import mimetypes
 import os
-import subprocess
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -85,26 +85,63 @@ def transcribe_with_groq(src: Path, ns) -> dict[str, Any]:
     api_key = os.environ.get('GROQ_API_KEY', '').strip()
     if not api_key:
         raise RuntimeError('GROQ_API_KEY is not available in the runtime environment')
-    if subprocess.run(['curl', '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode != 0:
-        raise RuntimeError('curl is required for the Groq backend')
 
-    cmd = [
-        'curl', '-sS', 'https://api.groq.com/openai/v1/audio/transcriptions',
-        '-H', f'Authorization: Bearer {api_key}',
-        '-F', f'file=@{src}',
-        '-F', f'model={ns.model}',
-        '-F', f'response_format=verbose_json',
-        '-F', 'temperature=0',
-    ]
+    boundary = f'openclaw-{hashlib.sha256(f"{src}:{ns.model}".encode("utf-8")).hexdigest()[:24]}'
+    crlf = b'\r\n'
+    body_parts: list[bytes] = []
+
+    def add_field(name: str, value: str) -> None:
+        body_parts.extend([
+            f'--{boundary}'.encode('utf-8'),
+            f'Content-Disposition: form-data; name="{name}"'.encode('utf-8'),
+            b'',
+            value.encode('utf-8'),
+        ])
+
+    add_field('model', ns.model)
+    add_field('response_format', 'verbose_json')
+    add_field('temperature', '0')
     if ns.language:
-        cmd.extend(['-F', f'language={ns.language}'])
-    result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=False)
-    if result.returncode != 0:
-        raise RuntimeError(f'curl failed: {result.stderr.strip() or result.stdout.strip()}')
+        add_field('language', ns.language)
+
+    filename = src.name
+    with src.open('rb') as f:
+        file_bytes = f.read()
+
+    body_parts.extend([
+        f'--{boundary}'.encode('utf-8'),
+        f'Content-Disposition: form-data; name="file"; filename="{filename}"'.encode('utf-8'),
+        b'Content-Type: application/octet-stream',
+        b'',
+        file_bytes,
+    ])
+    body_parts.append(f'--{boundary}--'.encode('utf-8'))
+    body = crlf.join(body_parts) + crlf
+
+    req = urllib.request.Request(
+        'https://api.groq.com/openai/v1/audio/transcriptions',
+        data=body,
+        method='POST',
+        headers={
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': f'multipart/form-data; boundary={boundary}',
+            'Content-Length': str(len(body)),
+        },
+    )
+
     try:
-        data = json.loads(result.stdout)
+        with urllib.request.urlopen(req, timeout=300) as response:
+            raw_body = response.read().decode('utf-8', errors='replace')
+    except urllib.error.HTTPError as exc:
+        error_body = exc.read().decode('utf-8', errors='replace') if hasattr(exc, 'read') else ''
+        raise RuntimeError(f'Groq HTTP error {exc.code}: {error_body[:800] or exc.reason}') from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError(f'Groq request failed: {exc.reason}') from exc
+
+    try:
+        data = json.loads(raw_body)
     except Exception as exc:
-        raise RuntimeError(f'Groq returned non-JSON output: {exc}; body={result.stdout[:500]}')
+        raise RuntimeError(f'Groq returned non-JSON output: {exc}; body={raw_body[:500]}')
     if isinstance(data, dict) and data.get('error'):
         raise RuntimeError(f'Groq API error: {data}')
     return data

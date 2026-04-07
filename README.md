@@ -9,7 +9,7 @@ It can run as:
 
 ## What it does
 
-- transcribes local audio/video with Groq Whisper via `curl`
+- transcribes local audio/video with Groq Whisper via a native Python HTTP request
 - downloads YouTube audio with `yt-dlp`
 - preprocesses oversized media to mono 16 kHz FLAC when needed
 - splits oversized media into overlapping chunks automatically
@@ -67,7 +67,7 @@ export OPENCLAW_TRANSCRIBE_VENV=/absolute/path/to/.venv-transcribe
 
 ## Notes on standalone publication
 
-This repo is close to publishable, but the plugin is still the most coupled layer because it expects this checkout layout. The core engine is already usable on its own; the remaining work is mostly packaging polish and documentation.
+This repo is publishable and now avoids exposing `GROQ_API_KEY` in process arguments during Groq requests. The plugin is still the most coupled layer because it expects this checkout layout, but the core engine is already usable on its own.
 
 ## Docs
 
